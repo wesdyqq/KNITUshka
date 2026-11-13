@@ -36,7 +36,7 @@
 
 ## Скачать и установить
 
-Открой [последний Android-релиз](https://github.com/wesdyqq/KNITUshka/releases/latest) и скачай APK из **Assets**, например `KNITUshka-v1.0.0.apk`.
+Открой [последний Android-релиз](https://github.com/wesdyqq/KNITUshka/releases/latest) и скачай APK из **Assets**, например `KNITUshka-v1.0.2.apk`.
 
 1. На телефоне открой скачанный APK.
 2. Если Android попросит, разреши установку из выбранного браузера или файлового менеджера.

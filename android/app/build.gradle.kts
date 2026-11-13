@@ -24,8 +24,8 @@ android {
         applicationId = "com.qq.knitushka"
         minSdk = 24
         targetSdk = 37
-        versionCode = 2
-        versionName = providers.gradleProperty("androidVersionName").orElse("1.0.1").get()
+        versionCode = 3
+        versionName = providers.gradleProperty("androidVersionName").orElse("1.0.2").get()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
