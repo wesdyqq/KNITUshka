@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="docs/assets/icon.svg" width="104" alt="Иконка КНИТушки — заяц на бордовом фоне">
+<img src="docs/assets/icon.svg" width="104" alt="Иконка КНИТУшки — заяц на бордовом фоне">
 
-# КНИТушка / KNITUshka
+# КНИТУшка / KNITUshka
 
 **Расписание КНИТУ под рукой — в том числе без интернета.**
 
@@ -13,13 +13,13 @@
 [![GitHub Release](https://img.shields.io/github/v/release/wesdyqq/KNITUshka?label=release)](https://github.com/wesdyqq/KNITUshka/releases/latest)
 [![Android CI](https://github.com/wesdyqq/KNITUshka/actions/workflows/android-ci.yml/badge.svg)](https://github.com/wesdyqq/KNITUshka/actions/workflows/android-ci.yml)
 
-[Скачать Android-версию](https://github.com/wesdyqq/KNITUshka/releases/latest) · [Сообщить об ошибке](https://github.com/wesdyqq/KNITUshka/issues/new/choose) · [Сборка из исходников](docs/getting-started.md)
+[Скачать Android-версию](https://github.com/wesdyqq/KNITUshka/releases/latest) · [Сообщить об ошибке](https://github.com/wesdyqq/KNITUshka/issues/new/choose)
 
 </div>
 
 ---
 
-КНИТушка — неофициальное open-source приложение для студентов Казанского национального исследовательского технологического университета. Выбери институт и группу при первом запуске — дальше приложение открывает расписание сразу.
+КНИТУшка — неофициальное open-source приложение для студентов Казанского национального исследовательского технологического университета. Выбери институт и группу при первом запуске — дальше приложение открывает расписание сразу.
 
 Данные загружаются с [сайта КНИТУ](https://www.kstu.ru/www_GFgrid.jsp). Аккаунт и отдельный сервер не нужны.
 
@@ -38,33 +38,15 @@
 
 Открой [последний Android-релиз](https://github.com/wesdyqq/KNITUshka/releases/latest) и скачай APK из **Assets**, например `KNITUshka-v1.0.0.apk`.
 
-**Первый публичный релиз ещё не выпущен.** Ссылка `latest` заработает после настройки подписи и успешной публикации первой версии. До этого тестовую сборку можно найти в Artifacts успешного [Android CI](https://github.com/wesdyqq/KNITUshka/actions/workflows/android-ci.yml); для скачивания Artifacts требуется вход в GitHub.
-
-1. На телефоне открой скачанный APK. Если это CI Artifact, сначала распакуй ZIP.
+1. На телефоне открой скачанный APK.
 2. Если Android попросит, разреши установку из выбранного браузера или файлового менеджера.
 3. Подтверди установку и выбери институт и группу.
 
-Требуется **Android 7.0 или новее**. Debug-сборки из CI — тестовые, не стабильные релизы. При переходе с локальной debug-версии на release Android может потребовать удалить старую установку из-за другой подписи; при этом локальные данные будут потеряны.
+Требуется **Android 7.0 или новее**. При переходе с локальной debug-версии на release Android может потребовать удалить старую установку из-за другой подписи; при этом локальные данные будут потеряны.
 
 ## Скриншоты
 
 Скриншоты интерфейса пока не добавлены в репозиторий. Здесь появятся настоящие снимки приложения; макеты и сгенерированные изображения не выдаются за рабочий интерфейс.
-
-## Сборка из исходников
-
-Используются **JDK 25**, **Gradle 9.6.0** через Wrapper, **Android Gradle Plugin 9.5.1**, Android SDK `platforms;android-37.0` и Build Tools `36.0.0`. Первая сборка требует доступа к репозиториям зависимостей.
-
-```bash
-git clone https://github.com/wesdyqq/KNITUshka.git
-cd KNITUshka/android
-./gradlew :app:assembleDebug :app:testDebugUnitTest :app:lintDebug
-```
-
-В Windows используй `gradlew.bat`. В Android Studio открывай **папку `android/`**, а не корень монорепозитория.
-
-Готовый APK: `android/app/build/outputs/apk/debug/app-debug.apk`.
-
-[Подробная настройка окружения и запуск →](docs/getting-started.md)
 
 ## Структура репозитория
 

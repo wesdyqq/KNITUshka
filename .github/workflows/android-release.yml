@@ -81,7 +81,7 @@ jobs:
           gh release create "$RELEASE_TAG" \
             "$GITHUB_WORKSPACE/dist/KNITUshka-${RELEASE_TAG}.apk" \
             "$GITHUB_WORKSPACE/dist/KNITUshka-${RELEASE_TAG}.apk.sha256" \
-            --verify-tag --generate-notes --title "КНИТушка ${RELEASE_TAG}" "${flags[@]}"
+            --verify-tag --generate-notes --title "КНИТУшка ${RELEASE_TAG}" "${flags[@]}"
       - name: Remove temporary keystore
         if: always()
         run: rm -f "$RUNNER_TEMP/knitushka-release.jks"

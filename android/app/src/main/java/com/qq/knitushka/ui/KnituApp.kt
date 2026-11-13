@@ -395,7 +395,7 @@ private fun SettingsDialog(state: ScheduleUiState, model: ScheduleViewModel, onD
             Text("Сохранённые недели доступны без интернета. При подключении приложение проверяет обновления. Фоновые проверки выполняются по возможности Android.", style = MaterialTheme.typography.bodyMedium)
             Text("Неофициальное студенческое приложение. Источник расписания — сайт КНИТУ. Время занятий — казанское (МСК).", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text("О приложении", style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
-            Text("КНИТушка — приложение с открытым исходным кодом. Код распространяется по лицензии MIT.", style = MaterialTheme.typography.bodyMedium)
+            Text("КНИТУшка — приложение с открытым исходным кодом. Код распространяется по лицензии MIT.", style = MaterialTheme.typography.bodyMedium)
             TextButton(onClick = { uri.openUri("https://github.com/wesdyqq/KNITUshka") }) {
                 Text("Оригинальный проект на GitHub")
             }

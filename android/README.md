@@ -1,4 +1,4 @@
-# КНИТушка — Android
+# КНИТУшка — Android
 
 Нативное Android-приложение на Kotlin + Jetpack Compose и Material 3.
 Это корень Gradle-проекта: в Android Studio нужно открывать **эту папку**.
