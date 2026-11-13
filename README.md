@@ -49,16 +49,17 @@
 <div align="center">
 <table>
   <tr>
-    <td align="center" width="25%"><img src="docs/assets/screenshots/01-onboarding.webp" width="230" alt="Первый запуск: выбор института"></td>
-    <td align="center" width="25%"><img src="docs/assets/screenshots/02-schedule.webp" width="230" alt="Расписание на день с карточками пар"></td>
-    <td align="center" width="25%"><img src="docs/assets/screenshots/03-no-classes.webp" width="230" alt="День без занятий"></td>
-    <td align="center" width="25%"><img src="docs/assets/screenshots/04-class-cards.webp" width="230" alt="Пары с аудиторией и преподавателем"></td>
+    <td align="center" width="33%"><img src="docs/assets/screenshots/01-onboarding.webp" width="230" alt="Первый запуск: выбор института"></td>
+    <td align="center" width="33%">
+      <img src="docs/assets/screenshots/02-schedule.webp" width="230" alt="Расписание дня с карточками пар"><br>
+      <img src="docs/assets/screenshots/02b-schedule-scrolled.webp" width="230" alt="Тот же день, прокрученный ниже: аудитории и преподаватели">
+    </td>
+    <td align="center" width="33%"><img src="docs/assets/screenshots/03-no-classes.webp" width="230" alt="День без занятий"></td>
   </tr>
   <tr>
     <td align="center">Первый запуск</td>
-    <td align="center">Расписание дня</td>
+    <td align="center">Расписание дня (и продолжение ниже)</td>
     <td align="center">День без пар</td>
-    <td align="center">Детали занятий</td>
   </tr>
 </table>
 </div>
