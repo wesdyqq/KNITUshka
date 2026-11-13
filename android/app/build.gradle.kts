@@ -24,8 +24,8 @@ android {
         applicationId = "com.qq.knitushka"
         minSdk = 24
         targetSdk = 37
-        versionCode = 1
-        versionName = providers.gradleProperty("androidVersionName").orElse("1.0").get()
+        versionCode = 2
+        versionName = providers.gradleProperty("androidVersionName").orElse("1.0.1").get()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -46,7 +46,8 @@ android {
             if (releaseSigningEnabled) signingConfig = signingConfigs.getByName("githubRelease")
             optimization {
                 enable = true
-                packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
+                // Optimize the whole program together. Experimental package-scoped optimization
+                // broke Kotlin superclass access after repackaging in the 1.0.0 release.
             }
         }
     }

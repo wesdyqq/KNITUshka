@@ -7,11 +7,13 @@ on:
       - 'android/**'
       - '.github/workflows/android-*.yml'
       - '.github/actions/setup-android/**'
+      - '.github/scripts/android-startup-smoke.sh'
   pull_request:
     paths:
       - 'android/**'
       - '.github/workflows/android-*.yml'
       - '.github/actions/setup-android/**'
+      - '.github/scripts/android-startup-smoke.sh'
   workflow_dispatch:
 
 permissions:

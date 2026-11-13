@@ -14,7 +14,7 @@ concurrency:
 jobs:
   release:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 50
     permissions:
       contents: write
     defaults:
@@ -69,7 +69,23 @@ jobs:
           cp app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/dist/KNITUshka-${RELEASE_TAG}.apk"
           cd "$GITHUB_WORKSPACE/dist"
           sha256sum "KNITUshka-${RELEASE_TAG}.apk" > "KNITUshka-${RELEASE_TAG}.apk.sha256"
-      - name: Publish GitHub Release after successful verification
+      - name: Enable emulator acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Smoke test the signed release APK before publication
+        uses: reactivecircus/android-emulator-runner@v2
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        with:
+          api-level: 35
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          emulator-options: -no-window -no-audio -no-snapshot -gpu swiftshader_indirect -no-boot-anim -camera-back none
+          script: bash "$GITHUB_WORKSPACE/.github/scripts/android-startup-smoke.sh" "$GITHUB_WORKSPACE/dist/KNITUshka-${RELEASE_TAG}.apk"
+      - name: Publish GitHub Release after successful verification and startup
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
