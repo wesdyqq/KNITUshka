@@ -381,6 +381,7 @@ private fun ErrorNotice(message: String, retry: () -> Unit) {
 
 @Composable
 private fun SettingsDialog(state: ScheduleUiState, model: ScheduleViewModel, onDismiss: () -> Unit) {
+    val uri = LocalUriHandler.current
     AlertDialog(onDismissRequest = onDismiss, title = { Text("Настройки") }, text = {
         Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("Оформление", style = MaterialTheme.typography.titleMedium)
@@ -393,6 +394,15 @@ private fun SettingsDialog(state: ScheduleUiState, model: ScheduleViewModel, onD
             OutlinedButton(onClick = { onDismiss(); model.choose() }, modifier = Modifier.fillMaxWidth()) { Text("Сменить группу") }
             Text("Сохранённые недели доступны без интернета. При подключении приложение проверяет обновления. Фоновые проверки выполняются по возможности Android.", style = MaterialTheme.typography.bodyMedium)
             Text("Неофициальное студенческое приложение. Источник расписания — сайт КНИТУ. Время занятий — казанское (МСК).", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("О приложении", style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
+            Text("КНИТушка — приложение с открытым исходным кодом. Код распространяется по лицензии MIT.", style = MaterialTheme.typography.bodyMedium)
+            TextButton(onClick = { uri.openUri("https://github.com/wesdyqq/KNITUshka") }) {
+                Text("Оригинальный проект на GitHub")
+            }
+            TextButton(onClick = { uri.openUri("https://github.com/wesdyqq/KNITUshka/blob/main/LICENSE") }) {
+                Text("Открыть лицензию MIT")
+            }
+            Text("© 2026 Камиль Сафьянов", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }, confirmButton = { TextButton(onClick = onDismiss) { Text("Закрыть") } })
 }
