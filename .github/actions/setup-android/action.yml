@@ -3,11 +3,15 @@ description: Install the JDK and SDK used by the existing Android project
 runs:
   using: composite
   steps:
-    - uses: actions/setup-java@v4
+    - uses: actions/setup-java@v5
       with:
         distribution: temurin
         java-version: '25'
     - uses: android-actions/setup-android@v3
+      with:
+        # The action defaults to "tools platform-tools"; "tools" is no longer available.
+        packages: platform-tools
+        log-accepted-android-sdk-licenses: 'false'
     - name: Install Android SDK packages
       shell: bash
       run: sdkmanager 'platforms;android-37.0' 'build-tools;36.0.0'
