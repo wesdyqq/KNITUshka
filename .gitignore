@@ -1,0 +1,62 @@
+# Android Studio, IntelliJ, Gradle and Kotlin (at any depth)
+.idea/
+*.iml
+.gradle/
+.kotlin/
+build/
+out/
+local.properties
+.externalNativeBuild/
+.cxx/
+captures/
+*.apk
+*.aab
+*.apks
+*.dex
+*.hprof
+hs_err_pid*.log
+replay_pid*.log
+core.*
+*.local.md
+
+# Signing material and local secrets — never publish these
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.key
+keystore.properties
+signing.properties
+.env
+.env.*
+!.env.example
+secrets.properties
+
+# Xcode / Swift / CocoaPods / Swift Package Manager
+DerivedData/
+.build/
+.swiftpm/
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+*.ipa
+*.dSYM/
+*.dSYM.zip
+*.xcarchive/
+*.mobileprovision
+Pods/
+Carthage/Build/
+
+# OS / editors / temporary output
+.DS_Store
+._*
+Thumbs.db
+Desktop.ini
+.vscode/
+*.swp
+*.swo
+*~
+/dist/
+# Gradle Wrapper scripts and gradle-wrapper.jar are intentionally tracked.
