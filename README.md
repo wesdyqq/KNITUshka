@@ -46,7 +46,22 @@
 
 ## Скриншоты
 
-Скриншоты интерфейса пока не добавлены в репозиторий. Здесь появятся настоящие снимки приложения; макеты и сгенерированные изображения не выдаются за рабочий интерфейс.
+<div align="center">
+<table>
+  <tr>
+    <td align="center" width="25%"><img src="docs/assets/screenshots/01-onboarding.webp" width="230" alt="Первый запуск: выбор института"></td>
+    <td align="center" width="25%"><img src="docs/assets/screenshots/02-schedule.webp" width="230" alt="Расписание на день с карточками пар"></td>
+    <td align="center" width="25%"><img src="docs/assets/screenshots/03-no-classes.webp" width="230" alt="День без занятий"></td>
+    <td align="center" width="25%"><img src="docs/assets/screenshots/04-class-cards.webp" width="230" alt="Пары с аудиторией и преподавателем"></td>
+  </tr>
+  <tr>
+    <td align="center">Первый запуск</td>
+    <td align="center">Расписание дня</td>
+    <td align="center">День без пар</td>
+    <td align="center">Детали занятий</td>
+  </tr>
+</table>
+</div>
 
 ## Структура репозитория
 
