@@ -1,7 +1,7 @@
 package com.qq.knitushka.ui
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -27,19 +27,17 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.qq.knitushka.ScheduleUiState
+import com.qq.knitushka.R
 import com.qq.knitushka.ScheduleViewModel
 import com.qq.knitushka.data.*
 import kotlinx.coroutines.delay
@@ -67,29 +65,9 @@ fun KnituApp(state: ScheduleUiState, model: ScheduleViewModel) {
     }
 }
 
-/** Original compact rabbit mark, not a reproduction of the supplied poster artwork. */
 @Composable
 private fun RabbitMark(modifier: Modifier = Modifier) {
-    val ink = MaterialTheme.colorScheme.onPrimaryContainer
-    val accent = MaterialTheme.colorScheme.primary
-    val bg = MaterialTheme.colorScheme.primaryContainer
-    Canvas(modifier.background(bg, RoundedCornerShape(24.dp)).padding(12.dp)) {
-        val w = size.width; val h = size.height
-        rotate(-16f, Offset(w * .29f, h * .4f)) {
-            drawOval(ink, Offset(w * .13f, 0f), Size(w * .26f, h * .66f))
-            drawOval(bg, Offset(w * .20f, h * .08f), Size(w * .12f, h * .46f))
-        }
-        rotate(16f, Offset(w * .7f, h * .4f)) {
-            drawOval(ink, Offset(w * .61f, 0f), Size(w * .26f, h * .66f))
-            drawOval(bg, Offset(w * .68f, h * .08f), Size(w * .12f, h * .46f))
-        }
-        drawOval(bg, Offset(w * .09f, h * .36f), Size(w * .82f, h * .61f))
-        drawOval(ink, Offset(w * .09f, h * .36f), Size(w * .82f, h * .61f), style = Stroke(w * .045f))
-        drawCircle(ink, w * .035f, Offset(w * .34f, h * .61f))
-        drawCircle(ink, w * .035f, Offset(w * .66f, h * .61f))
-        drawOval(accent, Offset(w * .44f, h * .69f), Size(w * .12f, h * .075f))
-        drawArc(ink, 15f, 150f, false, Offset(w * .36f, h * .72f), Size(w * .28f, h * .13f), style = Stroke(w * .025f))
-    }
+    Image(painter = painterResource(R.drawable.knitushka_mark), contentDescription = null, modifier = modifier)
 }
 
 @Composable

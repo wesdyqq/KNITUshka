@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/assets/icon.svg" width="104" alt="Иконка КНИТУшки — заяц на бордовом фоне">
+<img src="docs/assets/icon.png" width="104" alt="Иконка КНИТУшки — заяц в университетской жилетке">
 
 # КНИТУшка / KNITUshka
 
