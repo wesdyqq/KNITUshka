@@ -1,0 +1,36 @@
+name: Ошибка в приложении
+description: Сообщить о воспроизводимой проблеме
+title: '[Bug] '
+labels: []
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Версия приложения
+      placeholder: Например, 1.0.0 или commit тестовой сборки
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Устройство и версия Android
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Как воспроизвести
+      description: Для ошибок расписания укажи дату, группу и ссылку на источник.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Ожидаемый и фактический результат
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Скриншоты или логи
+      description: Удали личные данные, токены, пароли и идентификаторы устройства.

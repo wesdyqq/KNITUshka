@@ -1,0 +1,14 @@
+name: Set up KNITUshka Android build
+description: Install the JDK and SDK used by the existing Android project
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: '25'
+    - uses: android-actions/setup-android@v3
+    - name: Install Android SDK packages
+      shell: bash
+      run: sdkmanager 'platforms;android-37.0' 'build-tools;36.0.0'
+    - uses: gradle/actions/setup-gradle@v4
