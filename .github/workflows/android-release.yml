@@ -3,6 +3,12 @@ name: Android Release
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing version tag to build and publish (for example v1.0.1)
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -17,14 +23,18 @@ jobs:
     timeout-minutes: 50
     permissions:
       contents: write
+    env:
+      RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
     defaults:
       run:
         working-directory: android
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+        with:
+          # A manual retry uses the updated workflow but builds the immutable version tag.
+          ref: ${{ inputs.release_tag || github.ref }}
       - name: Validate tag and required signing secrets
         env:
-          RELEASE_TAG: ${{ github.ref_name }}
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
@@ -42,6 +52,20 @@ jobs:
             fi
           done
       - uses: ./.github/actions/setup-android
+      - name: Download emulator packages with bounded retries
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            echo "Installing emulator dependencies (attempt $attempt/3)"
+            if sdkmanager --install emulator platform-tools 'build-tools;37.0.0' \
+              'platforms;android-35' 'system-images;android-35;google_apis;x86_64'; then
+              break
+            fi
+            if [[ "$attempt" == 3 ]]; then
+              echo 'SDK download failed after three attempts. No release will be published.' >&2
+              exit 1
+            fi
+          done
       - name: Restore private signing key outside the repository
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -51,7 +75,6 @@ jobs:
           printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/knitushka-release.jks"
       - name: Test and build signed release
         env:
-          RELEASE_TAG: ${{ github.ref_name }}
           ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/knitushka-release.jks
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
@@ -60,8 +83,6 @@ jobs:
           ./gradlew :app:testDebugUnitTest :app:lintRelease :app:assembleRelease \
             -PandroidVersionName="${RELEASE_TAG#v}" --no-daemon --no-configuration-cache --console=plain
       - name: Verify APK signature and prepare download
-        env:
-          RELEASE_TAG: ${{ github.ref_name }}
         run: |
           set -euo pipefail
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
@@ -76,8 +97,6 @@ jobs:
           sudo udevadm trigger --name-match=kvm
       - name: Smoke test the signed release APK before publication
         uses: reactivecircus/android-emulator-runner@v2
-        env:
-          RELEASE_TAG: ${{ github.ref_name }}
         with:
           api-level: 35
           arch: x86_64
@@ -89,7 +108,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          RELEASE_TAG: ${{ github.ref_name }}
         run: |
           set -euo pipefail
           flags=()
