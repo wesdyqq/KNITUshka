@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit
 private val Context.preferences by preferencesDataStore("knitushka")
 data class CachedWeek(val week: ScheduleWeek, val checkedAt: Long)
 
-class ScheduleRepository(private val context: Context) {
+class ScheduleRepository(private val context: Context, private val onScheduleChanged: () -> Unit = {}) {
     private val database = Room.databaseBuilder(context, KnituDatabase::class.java, "knitushka.db").build()
     private val cache = database.cache()
     private val gate = Mutex()
@@ -43,6 +43,7 @@ class ScheduleRepository(private val context: Context) {
             .put("instituteId", group.institute.id).put("short", group.institute.shortName)
             .put("instituteName", group.institute.name).toString()
         context.preferences.edit { it[selectedKey] = text }
+        onScheduleChanged()
     }
 
     suspend fun theme(): String = context.preferences.data.first()[themeKey] ?: "system"
@@ -97,7 +98,7 @@ class ScheduleRepository(private val context: Context) {
         source(key(group, date), "www_Ggrid.jsp?f=${group.institute.id}&g=${group.id}&d=${date.monday()}", force) {
             ScheduleParser.week(it, date)
         }
-        return cached(group, date) ?: throw SourceFormatException()
+        return (cached(group, date) ?: throw SourceFormatException()).also { onScheduleChanged() }
     }
 
     suspend fun refreshWindow(group: StudyGroup) {

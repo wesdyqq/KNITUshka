@@ -11,11 +11,12 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.qq.knitushka.data.ScheduleRepository
 import com.qq.knitushka.data.SourceFormatException
+import com.qq.knitushka.widget.ScheduleWidgetProvider
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 class KnituApplication : Application() {
-    val repository by lazy { ScheduleRepository(this) }
+    val repository by lazy { ScheduleRepository(this) { ScheduleWidgetProvider.requestUpdate(this) } }
 
     override fun onCreate() {
         super.onCreate()

@@ -37,18 +37,30 @@ class ScheduleViewModel(application: Application) : AndroidViewModel(application
     private var weekJob: Job? = null
     private var pickerJob: Job? = null
     private var prefetchJob: Job? = null
+    private var requestedDate: LocalDate? = null
 
     init {
         viewModelScope.launch {
             try {
                 val group = repo.selection()
                 val theme = repo.theme()
-                mutable.update { it.copy(starting = false, group = group, theme = theme, choosing = group == null) }
+                val date = requestedDate ?: today()
+                if (group != null) requestedDate = null
+                mutable.update { it.copy(starting = false, group = group, date = date, theme = theme, choosing = group == null) }
                 if (group == null) loadInstitutes() else loadWeek()
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
                 mutable.update { it.copy(starting = false, choosing = true, pickerError = message(e)) }
             }
+        }
+    }
+
+    fun openDate(value: String?) {
+        val date = value?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: return
+        requestedDate = date
+        if (!state.value.starting && state.value.group != null) {
+            requestedDate = null
+            selectDate(date)
         }
     }
 
@@ -97,10 +109,11 @@ class ScheduleViewModel(application: Application) : AndroidViewModel(application
         pickerJob = viewModelScope.launch {
             mutable.update { it.copy(pickerLoading = true, pickerError = null) }
             try {
-                val date = today()
+                val date = requestedDate ?: today()
                 val cached = repo.cached(group, date) ?: repo.refresh(group, date)
                 // Persist only after a usable timetable exists. The old selection remains on failure.
                 repo.select(group)
+                requestedDate = null
                 weekJob?.cancel()
                 mutable.update { it.copy(group = group, choosing = false, date = date, cached = cached,
                     previewWeeks = mapOf(date.monday() to cached),

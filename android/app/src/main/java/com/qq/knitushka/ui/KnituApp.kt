@@ -30,6 +30,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
@@ -40,6 +42,7 @@ import com.qq.knitushka.ScheduleUiState
 import com.qq.knitushka.R
 import com.qq.knitushka.ScheduleViewModel
 import com.qq.knitushka.data.*
+import com.qq.knitushka.widget.ScheduleWidgetProvider
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
@@ -148,6 +151,25 @@ private fun ChoiceCard(title: String, subtitle: String, onClick: () -> Unit) {
 @Composable
 private fun Timetable(state: ScheduleUiState, model: ScheduleViewModel) {
     var settings by rememberSaveable { mutableStateOf(false) }
+    var pinRequested by remember { mutableStateOf(false) }
+    var manualWidgetHelp by rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
+    LaunchedEffect(pinRequested) {
+        if (pinRequested) {
+            // Let Compose remove the settings dialog window before asking the launcher for UI.
+            withFrameNanos { }
+            withFrameNanos { }
+            val accepted = runCatching { ScheduleWidgetProvider.requestPin(context) }.getOrDefault(false)
+            if (accepted) android.widget.Toast.makeText(context,
+                "Запрос отправлен. Если окна нет, добавь виджет через меню рабочего стола.",
+                android.widget.Toast.LENGTH_LONG).show()
+            else manualWidgetHelp = true
+            pinRequested = false
+        }
+    }
+    var currentToday by remember { mutableStateOf(today()) }
+    val scope = rememberCoroutineScope()
+    LaunchedEffect(Unit) { while (true) { currentToday = today(); delay(30_000) } }
     val pages = remember { CalendarPages(state.date) }
     val pager = rememberPagerState(initialPage = pages.dayPage(state.date), pageCount = { pages.pageCount })
     LaunchedEffect(state.date) {
@@ -165,7 +187,10 @@ private fun Timetable(state: ScheduleUiState, model: ScheduleViewModel) {
     }
     // One vertical scroll owner for the whole screen. The pager owns only the horizontal axis.
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-            TimetableHeader(state, model, { settings = true }, Modifier.fillMaxWidth())
+            TimetableHeader(state, model::choose, model::selectDate, { settings = true }, Modifier.fillMaxWidth(),
+                todayDate = currentToday, onToday = {
+                    scope.launch { pager.animateScrollToPage(pages.dayPage(currentToday)) }
+                })
             HorizontalPager(pager, modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top,
                 beyondViewportPageCount = 1, key = { pages.dayAt(it).toString() }) { page ->
                 val date = pages.dayAt(page)
@@ -174,54 +199,44 @@ private fun Timetable(state: ScheduleUiState, model: ScheduleViewModel) {
                     error = if (date.monday() == state.date.monday()) state.error else null), model)
             }
     }
-    if (settings) SettingsDialog(state, model, onDismiss = { settings = false })
+    if (settings) SettingsDialog(state, model::setTheme, { settings = false; model.choose() }, onDismiss = { settings = false },
+        onPinWidget = { settings = false; pinRequested = true })
+    if (manualWidgetHelp) AlertDialog(onDismissRequest = { manualWidgetHelp = false },
+        title = { Text("Добавление через рабочий стол") },
+        text = { Text("Этот рабочий стол не поддерживает добавление виджета кнопкой приложения.\n\n1. Зажми свободное место на главном экране.\n2. Открой «Виджеты» (или «Компоненты» → «Виджеты Android»).\n3. Найди «КНИТУшка» и перетащи виджет на экран.") },
+        confirmButton = { TextButton(onClick = {
+            manualWidgetHelp = false
+            context.startActivity(android.content.Intent(android.content.Intent.ACTION_MAIN)
+                .addCategory(android.content.Intent.CATEGORY_HOME))
+        }) { Text("Открыть главный экран") } },
+        dismissButton = { TextButton(onClick = { manualWidgetHelp = false }) { Text("Закрыть") } })
 }
 
 @Composable
-private fun TimetableHeader(state: ScheduleUiState, model: ScheduleViewModel, onSettings: () -> Unit, modifier: Modifier) {
+internal fun TimetableHeader(state: ScheduleUiState, onChooseGroup: () -> Unit,
+    onSelectDate: (LocalDate) -> Unit, onSettings: () -> Unit, modifier: Modifier = Modifier,
+    todayDate: LocalDate = today(), onToday: () -> Unit = { onSelectDate(todayDate) }) {
     val group = state.group ?: return
-    Column(modifier.padding(bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Row(Modifier.fillMaxWidth().padding(start = 24.dp, end = 12.dp, top = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Column(Modifier.weight(1f)) {
-                    Text("КНИТУшка", style = MaterialTheme.typography.titleLarge)
-                    Text("В ритме твоих пар", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Column(modifier.testTag("schedule_header").padding(bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                Spacer(Modifier.width(48.dp))
+                Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("Расписание", style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
+                    Text("КНИТУшка", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 IconButton(onClick = onSettings) { Icon(Icons.Outlined.Settings, "Открыть настройки") }
             }
-            Column(Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Spacer(Modifier.height(8.dp))
-                Text("Расписание", style = MaterialTheme.typography.headlineLarge, modifier = Modifier.semantics { heading() })
-                Surface(onClick = model::choose, shape = RoundedCornerShape(14.dp), color = MaterialTheme.colorScheme.secondaryContainer) {
-                    Row(Modifier.padding(horizontal = 14.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Outlined.School, null, Modifier.size(20.dp))
+            Column(Modifier.padding(horizontal = 16.dp)) {
+                Surface(onClick = onChooseGroup, shape = RoundedCornerShape(14.dp), color = MaterialTheme.colorScheme.secondaryContainer) {
+                    Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp).heightIn(min = 32.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Outlined.School, null, Modifier.size(18.dp))
                         Text("${group.name} · ${group.institute.shortName}", style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
-                        Icon(Icons.Outlined.UnfoldMore, "Сменить группу", Modifier.size(20.dp))
+                        Icon(Icons.Outlined.UnfoldMore, "Сменить группу", Modifier.size(18.dp))
                     }
                 }
             }
-            WeekPager(state, model::selectDate)
-            LazyRow(contentPadding = PaddingValues(horizontal = 24.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items((0L..6L).map { state.date.monday().plusDays(it) }, key = { it.toString() }) { day ->
-                    val selected = day == state.date
-                    val hasLessons = state.cached?.week?.lessons?.any { it.date == day } == true
-                    Surface(
-                        modifier = Modifier.widthIn(min = 54.dp).selectable(selected, onClick = { model.selectDate(day) }, role = Role.Tab)
-                            .semantics { contentDescription = "${day.format(dayFormat)}${if (hasLessons) ", есть занятия" else ""}" },
-                        shape = RoundedCornerShape(18.dp), color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
-                        contentColor = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
-                    ) {
-                        Column(Modifier.padding(horizontal = 14.dp, vertical = 12.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Text(day.format(DateTimeFormatter.ofPattern("EE", ru)), style = MaterialTheme.typography.labelSmall)
-                            Text(day.dayOfMonth.toString(), fontWeight = FontWeight.SemiBold, fontSize = 20.sp)
-                            Box(Modifier.size(4.dp).background(if (hasLessons) LocalContentColor.current else Color.Transparent, CircleShape))
-                        }
-                    }
-                }
-            }
-            Row(Modifier.fillMaxWidth().padding(horizontal = 24.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(state.date.format(dayFormat).replaceFirstChar { it.uppercase(ru) }, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f).semantics { heading() })
-                TextButton(onClick = { model.selectDate(today()) }) { Text("Сегодня") }
-            }
+            WeekPager(state, onSelectDate)
+            DayStrip(state.date, todayDate, state.cached?.week?.lessons?.map { it.date }?.toSet().orEmpty(), onSelectDate, onToday)
     }
 }
 
@@ -290,17 +305,16 @@ private fun WeekPager(state: ScheduleUiState, onSelectDate: (LocalDate) -> Unit)
             }
         }
     }
-    Row(Modifier.fillMaxWidth().padding(horizontal = 24.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = { scope.launch { pager.animateScrollToPage(pager.settledPage - 1) } }) {
             Icon(Icons.AutoMirrored.Outlined.KeyboardArrowLeft, "Предыдущая неделя")
         }
         HorizontalPager(pager, modifier = Modifier.weight(1f), beyondViewportPageCount = 1) { page ->
             val monday = pages.weekAt(page)
             val week = if (state.cached?.week?.monday == monday) state.cached else state.previewWeeks[monday]
-            Column(Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("${monday.format(shortDate)} — ${monday.plusDays(6).format(shortDate)}", style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
+            Column(Modifier.fillMaxWidth().padding(vertical = 2.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(0.dp)) {
+                Text("${monday.format(shortDate)} — ${monday.plusDays(6).format(shortDate)}", style = MaterialTheme.typography.labelLarge, textAlign = TextAlign.Center)
                 Text(week?.week?.parity?.ifBlank { "Неделя" } ?: "Неделя", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(monday.year.toString(), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
         IconButton(onClick = { scope.launch { pager.animateScrollToPage(pager.settledPage + 1) } }) {
@@ -310,21 +324,36 @@ private fun WeekPager(state: ScheduleUiState, onSelectDate: (LocalDate) -> Unit)
 }
 
 @Composable
-private fun LessonCard(lesson: Lesson, active: Boolean) {
-    Surface(Modifier.padding(horizontal = 24.dp).fillMaxWidth().then(if (active) Modifier.border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(20.dp)) else Modifier),
+internal fun LessonCard(lesson: Lesson, active: Boolean) {
+    Surface(Modifier.padding(horizontal = 16.dp).fillMaxWidth().then(if (active) Modifier.border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(20.dp)) else Modifier),
         shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surface) {
         SelectionContainer {
-            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text("${lesson.start} — ${lesson.end}", style = MaterialTheme.typography.titleMedium.copy(fontFeatureSettings = "tnum"), modifier = Modifier.weight(1f))
-                    Text("${lesson.number} пара", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.Top) {
+                Column(Modifier.widthIn(min = 60.dp, max = 84.dp).testTag("lesson_time_rail"),
+                    horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    val fontScale = androidx.compose.ui.platform.LocalDensity.current.fontScale
+                    Surface(shape = CircleShape, color = KnituRed,
+                        contentColor = KnituBeige,
+                        modifier = Modifier.size(maxOf(44f, 28f * fontScale + 16f).dp).testTag("lesson_number_circle")) {
+                        Box(Modifier.padding(8.dp), contentAlignment = Alignment.Center) {
+                            Text(lesson.number.toString(), style = MaterialTheme.typography.titleLarge.copy(fontFeatureSettings = "tnum"),
+                                modifier = Modifier.semantics { contentDescription = "${lesson.number} пара" })
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    Text("${lesson.start} –", style = MaterialTheme.typography.bodyMedium.copy(fontFeatureSettings = "tnum"),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.semantics { contentDescription = "Начало занятия ${lesson.start}" })
+                    Text(lesson.end, style = MaterialTheme.typography.bodyMedium.copy(fontFeatureSettings = "tnum"),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.semantics { contentDescription = "Окончание занятия ${lesson.end}" })
                 }
-                if (active) Text("Идёт сейчас", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
-                Text(lesson.subject, style = MaterialTheme.typography.titleMedium)
-                if (lesson.type.isNotBlank()) Text(when (lesson.type) { "ЛЕКЦ" -> "Лекция"; "ЛР" -> "Лабораторная работа"; "ПЗ", "ПР" -> "Практическое занятие"; else -> lesson.type }, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                if (lesson.room.isNotBlank()) Metadata(Icons.Outlined.LocationOn, lesson.room)
-                if (lesson.teachers.isNotEmpty()) Metadata(Icons.Outlined.PersonOutline, lesson.teachers.joinToString(", "))
-                if (lesson.details.isNotBlank()) Text(lesson.details, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (active) Text("Идёт сейчас", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                    Text(lesson.subject, style = MaterialTheme.typography.titleLarge.copy(fontSize = 22.sp, lineHeight = 31.sp))
+                    if (lesson.type.isNotBlank()) Text(when (lesson.type) { "ЛЕКЦ" -> "Лекция"; "ЛР" -> "Лабораторная работа"; "ПЗ", "ПР" -> "Практическое занятие"; else -> lesson.type }, style = MaterialTheme.typography.bodyMedium.copy(fontSize = 13.sp, lineHeight = 19.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    if (lesson.room.isNotBlank()) Metadata(Icons.Outlined.LocationOn, lesson.room)
+                    if (lesson.teachers.isNotEmpty()) Metadata(Icons.Outlined.PersonOutline, lesson.teachers.joinToString(", "))
+                    if (lesson.details.isNotBlank()) Text(lesson.details, style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp, lineHeight = 16.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
             }
         }
     }
@@ -333,8 +362,8 @@ private fun LessonCard(lesson: Lesson, active: Boolean) {
 @Composable
 private fun Metadata(icon: ImageVector, text: String) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Icon(icon, null, Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Icon(icon, null, Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(text, style = MaterialTheme.typography.bodyMedium.copy(fontSize = 13.sp, lineHeight = 19.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -355,32 +384,4 @@ private fun ErrorNotice(message: String, retry: () -> Unit) {
             TextButton(onClick = retry, colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onErrorContainer)) { Text("Повторить загрузку") }
         }
     }
-}
-
-@Composable
-private fun SettingsDialog(state: ScheduleUiState, model: ScheduleViewModel, onDismiss: () -> Unit) {
-    val uri = LocalUriHandler.current
-    AlertDialog(onDismissRequest = onDismiss, title = { Text("Настройки") }, text = {
-        Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("Оформление", style = MaterialTheme.typography.titleMedium)
-            listOf("system" to "Как на устройстве", "light" to "Светлое", "dark" to "Тёмное").forEach { (id, label) ->
-                Row(Modifier.fillMaxWidth().selectable(state.theme == id, onClick = { model.setTheme(id) }, role = Role.RadioButton).padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(selected = state.theme == id, onClick = null)
-                    Text(label, Modifier.padding(start = 12.dp))
-                }
-            }
-            OutlinedButton(onClick = { onDismiss(); model.choose() }, modifier = Modifier.fillMaxWidth()) { Text("Сменить группу") }
-            Text("Сохранённые недели доступны без интернета. При подключении приложение проверяет обновления. Фоновые проверки выполняются по возможности Android.", style = MaterialTheme.typography.bodyMedium)
-            Text("Неофициальное студенческое приложение. Источник расписания — сайт КНИТУ. Время занятий — казанское (МСК).", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text("О приложении", style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
-            Text("КНИТУшка — приложение с открытым исходным кодом. Код распространяется по лицензии MIT.", style = MaterialTheme.typography.bodyMedium)
-            TextButton(onClick = { uri.openUri("https://github.com/wesdyqq/KNITUshka") }) {
-                Text("Оригинальный проект на GitHub")
-            }
-            TextButton(onClick = { uri.openUri("https://github.com/wesdyqq/KNITUshka/blob/main/LICENSE") }) {
-                Text("Открыть лицензию MIT")
-            }
-            Text("© 2026 Камиль Сафьянов", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-    }, confirmButton = { TextButton(onClick = onDismiss) { Text("Закрыть") } })
 }

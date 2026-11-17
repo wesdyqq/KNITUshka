@@ -2,6 +2,7 @@ package com.qq.knitushka
 
 import android.net.ConnectivityManager
 import android.net.Network
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -13,6 +14,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.qq.knitushka.ui.KnituApp
 import com.qq.knitushka.ui.KnituTheme
+import com.qq.knitushka.widget.ScheduleWidgetProvider
 
 class MainActivity : ComponentActivity() {
     private val model: ScheduleViewModel by viewModels()
@@ -21,6 +23,7 @@ class MainActivity : ComponentActivity() {
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        model.openDate(ScheduleWidgetProvider.dateFromIntent(this, intent))
         enableEdgeToEdge()
         setContent {
             val state = model.state.collectAsStateWithLifecycle().value
@@ -32,6 +35,11 @@ class MainActivity : ComponentActivity() {
             }
             KnituTheme(state.theme) { KnituApp(state, model) }
         }
+    }
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        model.openDate(ScheduleWidgetProvider.dateFromIntent(this, intent))
     }
     override fun onStart() {
         super.onStart()

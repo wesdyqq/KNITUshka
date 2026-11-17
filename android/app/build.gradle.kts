@@ -10,6 +10,7 @@ val releaseKeyAlias = providers.environmentVariable("ANDROID_KEY_ALIAS").orNull
 val releaseKeyPassword = providers.environmentVariable("ANDROID_KEY_PASSWORD").orNull
 val releaseSigningValues = listOf(releaseKeystore, releaseStorePassword, releaseKeyAlias, releaseKeyPassword)
 val releaseSigningEnabled = releaseSigningValues.all { !it.isNullOrBlank() }
+val previewBuild = providers.gradleProperty("previewBuild").map { it.toBooleanStrict() }.orElse(false).get()
 if (releaseSigningValues.any { !it.isNullOrBlank() } && !releaseSigningEnabled) {
     throw GradleException("Release signing requires all four ANDROID_KEYSTORE_PATH, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS and ANDROID_KEY_PASSWORD environment variables.")
 }
@@ -24,8 +25,9 @@ android {
         applicationId = "com.qq.knitushka"
         minSdk = 24
         targetSdk = 37
-        versionCode = 3
-        versionName = providers.gradleProperty("androidVersionName").orElse("1.0.2").get()
+        versionCode = 4
+        versionName = providers.gradleProperty("androidVersionName").orElse("1.0.3").get()
+        manifestPlaceholders["appLabel"] = "@string/app_name"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -42,6 +44,13 @@ android {
     }
 
     buildTypes {
+        debug {
+            if (previewBuild) {
+                applicationIdSuffix = ".preview"
+                versionNameSuffix = "-preview"
+                manifestPlaceholders["appLabel"] = "КНИТУшка (тест)"
+            }
+        }
         release {
             if (releaseSigningEnabled) signingConfig = signingConfigs.getByName("githubRelease")
             optimization {
@@ -66,6 +75,9 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.ui:ui-tooling-preview")
     debugImplementation("androidx.compose.ui:ui-tooling")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    androidTestImplementation(platform("androidx.compose:compose-bom:2026.02.01"))
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.9.4")
     implementation("androidx.room:room-runtime:2.8.4")

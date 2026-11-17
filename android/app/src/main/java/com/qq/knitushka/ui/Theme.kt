@@ -9,12 +9,15 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
+internal val KnituRed = Color(0xFF862B3C)
+internal val KnituBeige = Color(0xFFFAF7F2)
+
 private val Light = lightColorScheme(
-    primary = Color(0xFF862B3C), onPrimary = Color.White,
+    primary = KnituRed, onPrimary = Color.White,
     primaryContainer = Color(0xFFF6E3E4), onPrimaryContainer = Color(0xFF4B1923),
     secondary = Color(0xFF665C57), onSecondary = Color.White,
     secondaryContainer = Color(0xFFEDE8E1), onSecondaryContainer = Color(0xFF403A35),
-    background = Color(0xFFFAF7F2), onBackground = Color(0xFF292522),
+    background = KnituBeige, onBackground = Color(0xFF292522),
     surface = Color(0xFFFFFCF8), onSurface = Color(0xFF292522),
     surfaceVariant = Color(0xFFF0EBE4), onSurfaceVariant = Color(0xFF6B625C),
     outline = Color(0xFF877B73), outlineVariant = Color(0xFFE0D8CF),

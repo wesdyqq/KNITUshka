@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">КНИТУшка</string>
+    <string name="widget_description">Расписание на день с переключением дат</string>
 </resources>
