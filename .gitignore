@@ -59,4 +59,5 @@ Desktop.ini
 *.swo
 *~
 /dist/
+/.local-releases/
 # Gradle Wrapper scripts and gradle-wrapper.jar are intentionally tracked.

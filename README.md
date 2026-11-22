@@ -6,7 +6,12 @@
 
 **Расписание КНИТУ под рукой — в том числе без интернета.**
 
-[Android](android/) [Kotlin](android/app/build.gradle.kts) [Jetpack Compose](android/) [MIT License](LICENSE) [GitHub Release](https://github.com/wesdyqq/KNITUshka/releases/latest) [Android CI](https://github.com/wesdyqq/KNITUshka/actions/workflows/android-ci.yml)
+[![Android](https://img.shields.io/badge/Android-7.0%2B-3DDC84?logo=android&logoColor=white)](android/)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.2.10-7F52FF?logo=kotlin&logoColor=white)](android/app/build.gradle.kts)
+[![Jetpack Compose](https://img.shields.io/badge/Jetpack-Compose-4285F4?logo=jetpackcompose&logoColor=white)](android/)
+[![MIT License](https://img.shields.io/badge/License-MIT-862B3C)](LICENSE)
+[![GitHub Release](https://img.shields.io/github/v/release/wesdyqq/KNITUshka?label=release)](https://github.com/wesdyqq/KNITUshka/releases/latest)
+[![Android CI](https://github.com/wesdyqq/KNITUshka/actions/workflows/android-ci.yml/badge.svg)](https://github.com/wesdyqq/KNITUshka/actions/workflows/android-ci.yml)
 
 [Скачать Android-версию](https://github.com/wesdyqq/KNITUshka/releases/latest) · [Сообщить об ошибке](https://github.com/wesdyqq/KNITUshka/issues/new/choose)
 
