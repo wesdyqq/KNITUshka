@@ -1,0 +1,2 @@
+<TextView xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/vivo_day_token"
+    android:layout_width="0dp" android:layout_height="0dp" android:importantForAccessibility="no" />

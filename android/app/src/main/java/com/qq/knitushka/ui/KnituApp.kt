@@ -175,9 +175,7 @@ private fun Timetable(state: ScheduleUiState, model: ScheduleViewModel) {
     LaunchedEffect(state.date) {
         val target = pages.dayPage(state.date)
         if (pager.settledPage != target) {
-            // Adjacent day buttons animate too; a week jump is handled by the separate week pager.
-            if (kotlin.math.abs(pager.settledPage - target) == 1) pager.animateScrollToPage(target)
-            else pager.scrollToPage(target)
+            pager.animateScrollToPage(target, animationSpec = CalendarPageAnimation)
         }
     }
     LaunchedEffect(pager) {
@@ -189,7 +187,7 @@ private fun Timetable(state: ScheduleUiState, model: ScheduleViewModel) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
             TimetableHeader(state, model::choose, model::selectDate, { settings = true }, Modifier.fillMaxWidth(),
                 todayDate = currentToday, onToday = {
-                    scope.launch { pager.animateScrollToPage(pages.dayPage(currentToday)) }
+                    scope.launch { pager.animateScrollToPage(pages.dayPage(currentToday), animationSpec = CalendarPageAnimation) }
                 })
             HorizontalPager(pager, modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top,
                 beyondViewportPageCount = 1, key = { pages.dayAt(it).toString() }) { page ->
@@ -295,7 +293,7 @@ private fun WeekPager(state: ScheduleUiState, onSelectDate: (LocalDate) -> Unit)
     val desired = state.date
     LaunchedEffect(desired.monday()) {
         val target = pages.weekPage(desired)
-        if (pager.settledPage != target) pager.scrollToPage(target)
+        if (pager.settledPage != target) pager.animateScrollToPage(target, animationSpec = CalendarPageAnimation)
     }
     LaunchedEffect(pager) {
         snapshotFlow { pager.settledPage }.distinctUntilChanged().drop(1).collect { page ->
@@ -306,7 +304,7 @@ private fun WeekPager(state: ScheduleUiState, onSelectDate: (LocalDate) -> Unit)
         }
     }
     Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-        IconButton(onClick = { scope.launch { pager.animateScrollToPage(pager.settledPage - 1) } }) {
+        IconButton(onClick = { scope.launch { pager.animateScrollToPage(pager.currentPage - 1, animationSpec = CalendarPageAnimation) } }) {
             Icon(Icons.AutoMirrored.Outlined.KeyboardArrowLeft, "Предыдущая неделя")
         }
         HorizontalPager(pager, modifier = Modifier.weight(1f), beyondViewportPageCount = 1) { page ->
@@ -317,7 +315,7 @@ private fun WeekPager(state: ScheduleUiState, onSelectDate: (LocalDate) -> Unit)
                 Text(week?.week?.parity?.ifBlank { "Неделя" } ?: "Неделя", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
-        IconButton(onClick = { scope.launch { pager.animateScrollToPage(pager.settledPage + 1) } }) {
+        IconButton(onClick = { scope.launch { pager.animateScrollToPage(pager.currentPage + 1, animationSpec = CalendarPageAnimation) } }) {
             Icon(Icons.AutoMirrored.Outlined.KeyboardArrowRight, "Следующая неделя")
         }
     }
@@ -329,9 +327,9 @@ internal fun LessonCard(lesson: Lesson, active: Boolean) {
         shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surface) {
         SelectionContainer {
             Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.Top) {
-                Column(Modifier.widthIn(min = 60.dp, max = 84.dp).testTag("lesson_time_rail"),
+                val fontScale = androidx.compose.ui.platform.LocalDensity.current.fontScale
+                Column(Modifier.widthIn(min = 60.dp, max = (84 * fontScale.coerceAtLeast(1f)).dp).testTag("lesson_time_rail"),
                     horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    val fontScale = androidx.compose.ui.platform.LocalDensity.current.fontScale
                     Surface(shape = CircleShape, color = KnituRed,
                         contentColor = KnituBeige,
                         modifier = Modifier.size(maxOf(44f, 28f * fontScale + 16f).dp).testTag("lesson_number_circle")) {
@@ -341,10 +339,15 @@ internal fun LessonCard(lesson: Lesson, active: Boolean) {
                         }
                     }
                     Spacer(Modifier.height(8.dp))
-                    Text("${lesson.start} –", style = MaterialTheme.typography.bodyMedium.copy(fontFeatureSettings = "tnum"),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.semantics { contentDescription = "Начало занятия ${lesson.start}" })
-                    Text(lesson.end, style = MaterialTheme.typography.bodyMedium.copy(fontFeatureSettings = "tnum"),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.semantics { contentDescription = "Окончание занятия ${lesson.end}" })
+                    Column(Modifier.width(IntrinsicSize.Max).testTag("lesson_time_block"),
+                        horizontalAlignment = Alignment.Start, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                         Text("${lesson.start} –", style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp,
+                             lineHeight = 23.sp, fontWeight = FontWeight.Black, fontFeatureSettings = "tnum"),
+                             color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.semantics { contentDescription = "Начало занятия ${lesson.start}" })
+                         Text(lesson.end, style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp,
+                             lineHeight = 23.sp, fontWeight = FontWeight.Black, fontFeatureSettings = "tnum"),
+                             color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.semantics { contentDescription = "Окончание занятия ${lesson.end}" })
+                    }
                 }
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     if (active) Text("Идёт сейчас", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)

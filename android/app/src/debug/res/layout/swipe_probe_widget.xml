@@ -1,0 +1,16 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@drawable/widget_background">
+    <!-- Provider swaps width/height before rotation, including for rectangular widgets. -->
+    <ListView android:id="@+id/swipe_probe_stack"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:layout_gravity="center" android:rotation="-90"
+        android:divider="@android:color/transparent" android:dividerHeight="0dp"
+        android:scrollbars="none" android:overScrollMode="never"
+        android:clipChildren="true" android:clipToPadding="true" />
+    <TextView android:id="@+id/swipe_probe_unsupported"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:gravity="center" android:padding="12dp" android:visibility="gone"
+        android:text="Эксперимент требует Android 12 или новее"
+        android:textColor="@color/widget_text" android:textSize="12sp" />
+</FrameLayout>

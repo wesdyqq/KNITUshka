@@ -1,0 +1,3 @@
+<resources>
+    <string name="swipe_probe_description">Проверка горизонтальных свайпов на Android 12+. Эксперимент без сохранения даты и таймера сброса.</string>
+</resources>

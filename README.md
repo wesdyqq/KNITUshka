@@ -6,12 +6,7 @@
 
 **Расписание КНИТУ под рукой — в том числе без интернета.**
 
-[![Android](https://img.shields.io/badge/Android-7.0%2B-3DDC84?logo=android&logoColor=white)](android/)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.2.10-7F52FF?logo=kotlin&logoColor=white)](android/app/build.gradle.kts)
-[![Jetpack Compose](https://img.shields.io/badge/Jetpack-Compose-4285F4?logo=jetpackcompose&logoColor=white)](android/)
-[![MIT License](https://img.shields.io/badge/License-MIT-862B3C)](LICENSE)
-[![GitHub Release](https://img.shields.io/github/v/release/wesdyqq/KNITUshka?label=release)](https://github.com/wesdyqq/KNITUshka/releases/latest)
-[![Android CI](https://github.com/wesdyqq/KNITUshka/actions/workflows/android-ci.yml/badge.svg)](https://github.com/wesdyqq/KNITUshka/actions/workflows/android-ci.yml)
+[Android](android/) [Kotlin](android/app/build.gradle.kts) [Jetpack Compose](android/) [MIT License](LICENSE) [GitHub Release](https://github.com/wesdyqq/KNITUshka/releases/latest) [Android CI](https://github.com/wesdyqq/KNITUshka/actions/workflows/android-ci.yml)
 
 [Скачать Android-версию](https://github.com/wesdyqq/KNITUshka/releases/latest) · [Сообщить об ошибке](https://github.com/wesdyqq/KNITUshka/issues/new/choose)
 
@@ -25,19 +20,18 @@
 
 ## Возможности
 
-- **Расписание по дням и неделям.** Предмет, время, аудитория, преподаватель и тип занятия в понятных карточках.
-- **Перелистывание жестами.** Дни листаются вместе с колонкой пар, недели — в блоке дат. Вверх-вниз весь экран прокручивается вместе.
-- **Работа без интернета.** Загруженные недели сохраняются на устройстве. После успешной загрузки приложение также запрашивает предыдущую, текущую и две следующие недели.
-- **Проверка актуальности.** При открытии, восстановлении связи, вручную и периодически в фоне. Сбой сайта не удаляет последнее корректное расписание.
-- **Обработка дублей.** Повторяющиеся записи одного временного слота объединяются; одинаковые пары, идущие подряд, остаются раздельными.
-- **Текущая и следующая пара**, выбор группы и светлое, тёмное или системное оформление.
-- **Виджет 2×3.** Краткое расписание выбранного дня, переключение дат кнопками, семь точек дней недели и открытие нужного дня в приложении. Через 10 минут возвращается к сегодняшнему дню; Android может задержать обновление во сне. На штатном рабочем столе Vivo добавляется вручную через меню виджетов.
+- **Расписание по дням и неделям:** предметы, время, аудитории, преподаватели и типы занятий.
+- **Свайпы и кнопки:** переключение дней и недель, быстрый возврат на сегодня.
+- **Офлайн:** загруженные недели сохраняются на устройстве; сбой сайта не удаляет последнее расписание.
+- **Обновление данных:** автоматически и вручную, с отметкой времени проверки.
+- **Оформление:** светлая, тёмная и системная темы; выделение текущей и следующей пары.
+- **Виджет 2×3:** переключение дат кнопками, индикатор дней недели и открытие выбранного дня в приложении.
 
 > Первому запуску нужен интернет. Офлайн доступны только уже загруженные недели. Android может откладывать фоновые проверки. Время занятий — казанское (МСК).
 
 ## Скачать и установить
 
-Открой [последний Android-релиз](https://github.com/wesdyqq/KNITUshka/releases/latest) и скачай APK из **Assets**, например `KNITUshka-v1.0.3.apk`.
+Открой [последний Android-релиз](https://github.com/wesdyqq/KNITUshka/releases/latest) и скачай APK из **Assets**.
 
 1. На телефоне открой скачанный APK.
 2. Если Android попросит, разреши установку из выбранного браузера или файлового менеджера.
@@ -47,25 +41,27 @@
 
 ## Скриншоты
 
+Виджет, расписание и настройки.
+
 <div align="center">
 <table>
   <tr>
-    <td align="center" width="25%"><img src="docs/assets/screenshots/01-onboarding.webp" width="220" alt="Первый запуск: выбор института"></td>
+    <td align="center" width="25%" valign="top"><img src="docs/assets/screenshots/01-widget.webp" width="220" alt="Виджет расписания: пары, стрелки и индикатор дня"></td>
     <td align="center" width="25%"><img src="docs/assets/screenshots/02-schedule.webp" width="220" alt="Расписание дня с карточками пар"></td>
     <td align="center" width="25%"><img src="docs/assets/screenshots/02b-schedule-scrolled.webp" width="220" alt="Тот же день, прокрученный ниже: аудитории и преподаватели"></td>
-    <td align="center" width="25%"><img src="docs/assets/screenshots/03-no-classes.webp" width="220" alt="День без занятий"></td>
+    <td align="center" width="25%"><img src="docs/assets/screenshots/03-settings.webp" width="220" alt="Настройки: оформление, выбор группы и добавление виджета"></td>
   </tr>
   <tr>
-    <td align="center">Первый запуск</td>
+    <td align="center">Виджет</td>
     <td align="center" colspan="2">Расписание дня</td>
-    <td align="center">День без пар</td>
+    <td align="center">Настройки</td>
   </tr>
 </table>
 </div>
 
 ## Структура репозитория
 
-```text
+```
 KNITUshka/
 ├── android/                 # Kotlin + Jetpack Compose, Gradle Wrapper и тесты
 ├── ios/                     # Место для готовящейся iOS-версии
@@ -94,7 +90,7 @@ KNITUshka/
 
 Баг-репорты, предложения и pull requests приветствуются. Прежде чем менять поведение приложения, опиши задачу в [Issues](https://github.com/wesdyqq/KNITUshka/issues).
 
-[Правила участия →](CONTRIBUTING.md) · [Как устроено Android-приложение →](docs/architecture.md) · [Как выпускаются версии →](docs/releases.md)
+[Правила участия →](CONTRIBUTING.md) · [Как устроено Android-приложение →](docs/architecture.md)
 
 ## Лицензия
 

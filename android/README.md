@@ -6,7 +6,7 @@
 - [Описание и возможности приложения](../README.md)
 - [Окружение, сборка и запуск](../docs/getting-started.md)
 - [Архитектура, источник расписания и офлайн-кэш](../docs/architecture.md)
-- [Подпись APK и релизы](../docs/releases.md)
+- [Сборка подписанных релизов в GitHub Actions](../.github/workflows/android-release.yml)
 - [Участие в разработке](../CONTRIBUTING.md)
 
 Из этого каталога:

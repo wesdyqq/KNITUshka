@@ -1,0 +1,13 @@
+<org.knitushka.vivoprobe.ProbeView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+    <!-- Standard RemoteViews children transport data and app-issued PendingIntents.
+         Custom host code never writes launcher preferences or creates host-identity intents. -->
+    <TextView android:id="@+id/vivo_payload" android:layout_width="0dp"
+        android:layout_height="0dp" android:visibility="gone" android:importantForAccessibility="no" />
+    <LinearLayout android:id="@+id/vivo_tokens" android:layout_width="0dp"
+        android:layout_height="0dp" android:visibility="gone" android:orientation="vertical"
+        android:importantForAccessibility="noHideDescendants" />
+    <LinearLayout android:id="@+id/vivo_open_tokens" android:layout_width="0dp"
+        android:layout_height="0dp" android:visibility="gone" android:orientation="vertical"
+        android:importantForAccessibility="noHideDescendants" />
+</org.knitushka.vivoprobe.ProbeView>

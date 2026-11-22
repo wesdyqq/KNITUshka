@@ -18,19 +18,24 @@ class ScheduleWidgetService : RemoteViewsService() {
             override fun getCount() = snapshot?.lessons?.size ?: 0
             override fun getViewAt(position: Int): RemoteViews? {
                 val row = snapshot?.lessons?.getOrNull(position) ?: return null
-                return RemoteViews(packageName, R.layout.schedule_widget_lesson).apply {
-                    setTextViewText(R.id.widget_lesson_number, row.number.toString())
-                    setTextViewText(R.id.widget_lesson_subject, row.subject)
-                    setTextViewText(R.id.widget_lesson_time, row.time)
-                    setTextViewText(R.id.widget_lesson_room, row.room.ifBlank { "Аудитория не указана" })
-                    setOnClickFillInIntent(R.id.widget_lesson_root, Intent().putExtra(
-                        ScheduleWidgetProvider.EXTRA_DATE, snapshot?.date.toString()))
-                }
+                return lessonViews(packageName, row, Intent().putExtra(
+                    ScheduleWidgetProvider.EXTRA_DATE, snapshot?.date.toString()))
             }
             override fun getLoadingView(): RemoteViews? = null
             override fun getViewTypeCount() = 1
             override fun getItemId(position: Int) = position.toLong()
             override fun hasStableIds() = false
         }
+    }
+
+    companion object {
+        internal fun lessonViews(packageName: String, row: WidgetLesson, click: Intent): RemoteViews =
+            RemoteViews(packageName, R.layout.schedule_widget_lesson).apply {
+                setTextViewText(R.id.widget_lesson_number, row.number.toString())
+                setTextViewText(R.id.widget_lesson_subject, row.subject)
+                setTextViewText(R.id.widget_lesson_time, row.time)
+                setTextViewText(R.id.widget_lesson_room, row.room.ifBlank { "Аудитория не указана" })
+                setOnClickFillInIntent(R.id.widget_lesson_root, click)
+            }
     }
 }

@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: Existing version tag to build and publish (for example v1.0.1)
+        description: Existing version tag to build and publish (for example v1.1)
         required: true
         type: string
 
@@ -41,13 +41,13 @@ jobs:
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           set -euo pipefail
-          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z]+([.-][0-9A-Za-z]+)*)?$ ]]; then
-            echo 'Expected a version tag such as v1.0.0 or v1.1.0-beta.1' >&2
+          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+(\.[0-9]+)?(-[0-9A-Za-z]+([.-][0-9A-Za-z]+)*)?$ ]]; then
+            echo 'Expected a version tag such as v1.1, v1.1.1 or v1.1-beta.1' >&2
             exit 1
           fi
           for name in KEYSTORE_BASE64 KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
             if [[ -z "${!name}" ]]; then
-              echo "Missing signing secret for $name. See docs/releases.md. No release will be published." >&2
+              echo "Missing signing secret for $name. Configure all four ANDROID_KEYSTORE_* / ANDROID_KEY_* repository secrets. No release will be published." >&2
               exit 1
             fi
           done
@@ -86,6 +86,21 @@ jobs:
         run: |
           set -euo pipefail
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
+          apk=app/build/outputs/apk/release/app-release.apk
+          [[ "$(apkanalyzer manifest application-id "$apk")" == 'com.qq.knitushka' ]] || {
+            echo 'Wrong package: refusing to publish a preview or private APK.' >&2; exit 1;
+          }
+          [[ "$(apkanalyzer manifest version-name "$apk")" == "${RELEASE_TAG#v}" ]] || {
+            echo 'APK version does not match the release tag.' >&2; exit 1;
+          }
+          [[ "$(apkanalyzer manifest debuggable "$apk")" == 'false' ]] || {
+            echo 'Refusing to publish a debuggable APK.' >&2; exit 1;
+          }
+          certificate=$("$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --print-certs "$apk" |
+            sed -n 's/^Signer #1 certificate SHA-256 digest: //p')
+          [[ "$certificate" == '56efc6cbcdbb561afa1be3656ae3c6ae29e556ef6a71c84bdf4eb4a8f5e8636e' ]] || {
+            echo 'Unexpected signing certificate: existing installations could not update.' >&2; exit 1;
+          }
           mkdir -p "$GITHUB_WORKSPACE/dist"
           cp app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/dist/KNITUshka-${RELEASE_TAG}.apk"
           cd "$GITHUB_WORKSPACE/dist"

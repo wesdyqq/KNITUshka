@@ -4,4 +4,5 @@
     <color name="widget_secondary">#C5B9B0</color>
     <color name="widget_accent">#F1ADB9</color>
     <color name="widget_border">#4A413B</color>
+    <color name="widget_dot_inactive">#A18D76</color>
 </resources>

@@ -1,0 +1,31 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+    <application>
+        <activity android:name="org.knitushka.vivoprobe.ProbeActivity" android:exported="true"
+            android:enabled="${vivoResearchEnabled}" />
+        <receiver android:name="org.knitushka.vivoprobe.ProbeProvider" android:exported="false"
+            android:enabled="${vivoResearchEnabled}" android:label="КНИТУшка">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/vivo_hybrid_info" />
+            <meta-data android:name="com.vivo.launcher.support.widget_slide_mode" android:value="horizontal" />
+        </receiver>
+        <receiver android:name=".widget.ScheduleWidgetProvider" android:label="КНИТУшка (тест)" android:exported="false"
+            android:enabled="${standardWidgetEnabled}"
+            tools:replace="android:label">
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".widget.SwipeProbeWidgetProvider" android:exported="false" android:enabled="false"
+            android:label="КНИТУшка — свайпы (эксперимент)">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/swipe_probe_widget_info" />
+            <meta-data android:name="com.vivo.launcher.support.widget_slide_mode" android:value="horizontal|vertical" />
+        </receiver>
+    </application>
+</manifest>

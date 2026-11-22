@@ -32,7 +32,7 @@ signing.properties
 .env.*
 !.env.example
 secrets.properties
-
+.todo
 # Xcode / Swift / CocoaPods / Swift Package Manager
 DerivedData/
 .build/

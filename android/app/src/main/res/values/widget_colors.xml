@@ -4,4 +4,7 @@
     <color name="widget_secondary">#6B625C</color>
     <color name="widget_accent">#862B3C</color>
     <color name="widget_border">#E0D8CF</color>
+    <color name="widget_dot_inactive">#9A8973</color>
+    <color name="widget_control_background">#862B3C</color>
+    <color name="widget_control_foreground">#FAF7F2</color>
 </resources>

@@ -27,7 +27,7 @@ class SettingsScreenTest {
         var theme by mutableStateOf("system")
         var action = ""
         compose.setContent { KnituTheme(theme) {
-            SettingsScreen(state.copy(theme = theme), "1.0.3", { theme = it },
+            SettingsScreen(state.copy(theme = theme), "1.1", { theme = it },
                 { action = "group" }, { action = "widget" }, { action = "close" }, { action = it })
         } }
         compose.onNodeWithText("Как на устройстве").assertIsSelected()
@@ -60,7 +60,7 @@ class SettingsScreenTest {
         compose.setContent { KnituTheme("dark") {
             val density = LocalDensity.current.density
             CompositionLocalProvider(LocalDensity provides Density(density, 2f)) {
-                Box(Modifier.width(320.dp)) { SettingsScreen(state, "1.0.3", {}, {}, {}, {}, {}) }
+                Box(Modifier.width(320.dp)) { SettingsScreen(state, "1.1", {}, {}, {}, {}, {}) }
             }
         } }
         compose.onNodeWithText("Как на устройстве").performScrollTo().assertIsDisplayed()

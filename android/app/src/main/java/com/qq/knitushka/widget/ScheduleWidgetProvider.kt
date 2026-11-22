@@ -13,6 +13,9 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.RemoteViews
 import android.widget.Toast
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
 import com.qq.knitushka.KnituApplication
 import com.qq.knitushka.MainActivity
 import com.qq.knitushka.R
@@ -37,7 +40,7 @@ class ScheduleWidgetProvider : AppWidgetProvider() {
             requestUpdate(context)
             return
         }
-        if (intent.action !in setOf(REFRESH, PREVIOUS, NEXT, Intent.ACTION_DATE_CHANGED,
+        if (intent.action !in setOf(REFRESH, PREVIOUS, NEXT, Intent.ACTION_DATE_CHANGED, Intent.ACTION_MY_PACKAGE_REPLACED,
                 Intent.ACTION_TIME_CHANGED, Intent.ACTION_TIMEZONE_CHANGED, Intent.ACTION_BOOT_COMPLETED)) {
             super.onReceive(context, intent)
             return
@@ -99,6 +102,10 @@ class ScheduleWidgetProvider : AppWidgetProvider() {
             if (needsManualWidgetPin(Build.MANUFACTURER, launcher)) return false
             val manager = AppWidgetManager.getInstance(context)
             if (!manager.isRequestPinAppWidgetSupported) return false
+            // Debug research uses a different host-capable provider, but exposes only
+            // one widget. Pin the enabled provider rather than a disabled legacy entry.
+            val provider = manager.installedProviders.filter { it.provider.packageName == context.packageName }
+                .singleOrNull()?.provider ?: ComponentName(context, ScheduleWidgetProvider::class.java)
             val preview = RemoteViews(context.packageName, R.layout.schedule_widget).apply {
                 setTextViewText(R.id.widget_empty, "Расписание выбранной группы")
             }
@@ -106,8 +113,8 @@ class ScheduleWidgetProvider : AppWidgetProvider() {
             val confirmed = PendingIntent.getBroadcast(context, 0,
                 Intent(context, ScheduleWidgetProvider::class.java).setAction(PINNED),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-            return manager.requestPinAppWidget(ComponentName(context, ScheduleWidgetProvider::class.java),
-                extras, confirmed)
+            return manager.requestPinAppWidget(provider, extras,
+                if (provider.className == ScheduleWidgetProvider::class.java.name) confirmed else null)
         }
 
         internal fun openDate(context: Context, id: Int, date: LocalDate) = Intent(context, MainActivity::class.java)
@@ -161,12 +168,14 @@ class ScheduleWidgetProvider : AppWidgetProvider() {
             val date = snapshot.date
             val ru = Locale.forLanguageTag("ru-RU")
             return RemoteViews(context.packageName, R.layout.schedule_widget).apply {
-                setTextViewText(R.id.widget_date, date.format(DateTimeFormatter.ofPattern("d MMMM", ru)))
+                setTextViewText(R.id.widget_date, date.format(DateTimeFormatter.ofPattern("dd/MM", ru)))
+                setContentDescription(R.id.widget_date, date.format(DateTimeFormatter.ofPattern("d MMMM yyyy", ru)))
                 setTextViewText(R.id.widget_weekday, date.format(DateTimeFormatter.ofPattern("EEEE", ru))
                     .replaceFirstChar { it.uppercase(ru) })
                 setTextViewText(R.id.widget_group, snapshot.group)
+                setContentDescription(R.id.widget_group, "Группа ${snapshot.group}")
                 setTextViewText(R.id.widget_empty, snapshot.emptyMessage)
-                setTextViewText(R.id.widget_dots, (1..7).joinToString("  ") { if (it == date.dayOfWeek.value) "●" else "○" })
+                setImageViewBitmap(R.id.widget_dots, dayDotsImage(context, date.dayOfWeek.value))
                 setContentDescription(R.id.widget_dots, "День недели ${date.dayOfWeek.value} из 7")
                 setEmptyView(R.id.widget_lessons, R.id.widget_empty)
                 val adapter = Intent(context, ScheduleWidgetService::class.java)
@@ -186,6 +195,25 @@ class ScheduleWidgetProvider : AppWidgetProvider() {
                         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
                 }
             }
+        }
+
+        internal fun dayDotsImage(context: Context, selectedDay: Int): Bitmap {
+            val metrics = context.resources.displayMetrics
+            val density = metrics.density
+            // A compact image cannot wrap, and centerInside scales it down on narrow widgets.
+            // Explicit pixels also avoid launcher-specific handling of colored text spans.
+            val dots = Bitmap.createBitmap(kotlin.math.ceil(70 * density).toInt(),
+                kotlin.math.ceil(12 * density).toInt(), Bitmap.Config.ARGB_8888)
+            dots.density = metrics.densityDpi
+            val canvas = Canvas(dots)
+            val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+            (1..7).forEach { day ->
+                paint.color = context.getColor(if (day == selectedDay) R.color.widget_accent else R.color.widget_dot_inactive)
+                paint.style = Paint.Style.FILL
+                canvas.drawCircle((5f + (day - 1) * 10) * density, 6 * density,
+                    (if (day == selectedDay) 3.5f else 3f) * density, paint)
+            }
+            return dots
         }
     }
 }
